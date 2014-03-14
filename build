@@ -1,0 +1,58 @@
+#/bin/bash -x 
+
+UBUNTU_VERSION=`lsb_release -c | cut -f2`
+
+sudo apt-get install build-essential -y
+sudo apt-get build-dep nginx -y
+sudo apt-get install dpkg-dev build-essential zlib1g-dev libpcre3 libpcre3-dev git unzip -y
+
+wget -N http://nginx.org/keys/nginx_signing.key
+sudo apt-key add nginx_signing.key
+rm nginx_signing.key
+
+# add nginx to sources
+echo "deb http://nginx.org/packages/ubuntu/ ${UBUNTU_VERSION} nginx" | sudo tee /etc/apt/sources.list.d/nginx.list
+echo "deb-src http://nginx.org/packages/ubuntu/ ${UBUNTU_VERSION} nginx" | sudo tee -a /etc/apt/sources.list.d/nginx.list
+
+# update list of packages
+sudo apt-get update
+
+# build dir
+cd /tmp
+
+# install any packages needed for nginx
+sudo apt-get build-dep nginx -y
+
+apt-get source nginx
+NGINX_VER=$(find ./nginx* -maxdepth 0 -type d | sed "s|^\./||")
+NGINX_BUILD_DIR=/tmp/$NGINX_VER
+
+echo "Using nginx ${NGINX_VER}"
+
+# can edit debian/rules for your modules
+# here we use sed to add the geoip module
+sed -i '/--with-http_sub_module \\/i--with-http_geoip_module \\' $NGINX_BUILD_DIR/debian/rules
+
+# create a modules dir to hold the pagespeed module
+mkdir $NGINX_BUILD_DIR/modules
+cd $NGINX_BUILD_DIR/modules
+
+# steps from https://github.com/pagespeed/ngx_pagespeed
+# download pagespeed
+wget https://github.com/pagespeed/ngx_pagespeed/archive/v1.7.30.4-beta.zip
+
+unzip v1.7.30.4-beta.zip
+cd ngx_pagespeed-1.7.30.4-beta/
+
+wget https://dl.google.com/dl/page-speed/psol/1.7.30.4.tar.gz
+tar -xzvf 1.7.30.4.tar.gz # expands to psol/
+
+# now enable pagespeed module in debian/rules
+sed -i '/--with-file-aio \\/i--add-module=modules/ngx_pagespeed-1.7.30.4-beta \\' $NGINX_BUILD_DIR/debian/rules
+
+# build deb
+cd $NGINX_BUILD_DIR
+dpkg-buildpackage -b
+
+# debs should be in /tmp
+
