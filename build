@@ -39,16 +39,16 @@ cd $NGINX_BUILD_DIR/modules
 
 # steps from https://github.com/pagespeed/ngx_pagespeed
 # download pagespeed
-wget https://github.com/pagespeed/ngx_pagespeed/archive/v1.7.30.4-beta.zip
+wget https://github.com/pagespeed/ngx_pagespeed/archive/v1.8.31.2-beta.zip
 
-unzip v1.7.30.4-beta.zip
-cd ngx_pagespeed-1.7.30.4-beta/
+unzip v1.8.31.2-beta.zip
+cd ngx_pagespeed-1.8.31.2-beta/
 
-wget https://dl.google.com/dl/page-speed/psol/1.7.30.4.tar.gz
-tar -xzvf 1.7.30.4.tar.gz # expands to psol/
+wget https://dl.google.com/dl/page-speed/psol/1.8.31.2.tar.gz
+tar -xzvf 1.8.31.2.tar.gz 
 
 # now enable pagespeed module in debian/rules
-sed -i '/--with-file-aio \\/i--add-module=modules/ngx_pagespeed-1.7.30.4-beta \\' $NGINX_BUILD_DIR/debian/rules
+sed -i '/--with-file-aio \\/i--add-module=modules/ngx_pagespeed-1.8.31.2-beta \\' $NGINX_BUILD_DIR/debian/rules
 
 # build deb
 cd $NGINX_BUILD_DIR
