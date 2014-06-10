@@ -18,14 +18,15 @@ echo "deb-src http://nginx.org/packages/ubuntu/ ${UBUNTU_VERSION} nginx" | sudo 
 sudo apt-get update
 
 # build dir
-cd /tmp
+mkdir ~/ngx_build
+cd ~/ngx_build
 
 # install any packages needed for nginx
 sudo apt-get build-dep nginx -y
 
 apt-get source nginx
 NGINX_VER=$(find ./nginx* -maxdepth 0 -type d | sed "s|^\./||")
-NGINX_BUILD_DIR=/tmp/$NGINX_VER
+NGINX_BUILD_DIR=~/ngx_build/$NGINX_VER
 
 echo "Using nginx ${NGINX_VER}"
 
@@ -39,20 +40,18 @@ cd $NGINX_BUILD_DIR/modules
 
 # steps from https://github.com/pagespeed/ngx_pagespeed
 # download pagespeed
-wget https://github.com/pagespeed/ngx_pagespeed/archive/v1.8.31.2-beta.zip
-
-unzip v1.8.31.2-beta.zip
-cd ngx_pagespeed-1.8.31.2-beta/
-
-wget https://dl.google.com/dl/page-speed/psol/1.8.31.2.tar.gz
-tar -xzvf 1.8.31.2.tar.gz 
+wget https://github.com/pagespeed/ngx_pagespeed/archive/v1.8.31.3-beta.zip
+unzip v1.8.31.3-beta.zip
+cd ngx_pagespeed-1.8.31.3-beta/
+wget https://dl.google.com/dl/page-speed/psol/1.8.31.3.tar.gz
+tar -xzvf 1.8.31.3.tar.gz
 
 # now enable pagespeed module in debian/rules
-sed -i '/--with-file-aio \\/i--add-module=modules/ngx_pagespeed-1.8.31.2-beta \\' $NGINX_BUILD_DIR/debian/rules
+sed -i '/--with-file-aio \\/i--add-module=modules/ngx_pagespeed-1.8.31.3-beta \\' $NGINX_BUILD_DIR/debian/rules
 
 # build deb
 cd $NGINX_BUILD_DIR
 dpkg-buildpackage -b
 
-# debs should be in /tmp
+# debs should be in ~/nx_build
 
