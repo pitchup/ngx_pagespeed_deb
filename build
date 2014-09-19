@@ -1,5 +1,7 @@
 #/bin/bash -x 
 
+set -x
+
 NPS_VERSION=1.9.32.1
 
 UBUNTU_VERSION=`lsb_release -c | cut -f2`
@@ -20,6 +22,7 @@ echo "deb-src http://nginx.org/packages/ubuntu/ ${UBUNTU_VERSION} nginx" | sudo 
 sudo apt-get update
 
 # build dir
+rm -rf ~/ngx_build
 mkdir ~/ngx_build
 cd ~/ngx_build
 
@@ -34,7 +37,7 @@ echo "Using nginx ${NGINX_VER}"
 
 # can edit debian/rules for your modules
 # here we use sed to add the geoip module
-sed -i '/--with-http_sub_module \\/i--with-http_geoip_module \\' $NGINX_BUILD_DIR/debian/rules
+#sed -i '/--with-http_sub_module \\/i--with-http_geoip_module \\' $NGINX_BUILD_DIR/debian/rules
 
 # create a modules dir to hold the pagespeed module
 mkdir $NGINX_BUILD_DIR/modules
@@ -49,7 +52,7 @@ wget https://dl.google.com/dl/page-speed/psol/${NPS_VERSION}.tar.gz
 tar -xzvf ${NPS_VERSION}.tar.gz  # extracts to psol/
 
 # now enable pagespeed module in debian/rules
-sed -i '/--with-file-aio \\/i--add-module=modules/ngx_pagespeed-${NPS_VERSION}-beta \\' $NGINX_BUILD_DIR/debian/rules
+sed -i "/--with-file-aio \\/i--add-module=modules/ngx_pagespeed-${NPS_VERSION}-beta \\" $NGINX_BUILD_DIR/debian/rules
 
 # build deb
 cd $NGINX_BUILD_DIR
