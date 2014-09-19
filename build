@@ -1,4 +1,4 @@
-#/bin/bash -x 
+#!/bin/bash -x 
 
 set -x
 
@@ -8,7 +8,7 @@ UBUNTU_VERSION=`lsb_release -c | cut -f2`
 
 sudo apt-get install build-essential -y
 sudo apt-get build-dep nginx -y
-sudo apt-get install dpkg-dev build-essential zlib1g-dev libpcre3 libpcre3-dev git unzip -y
+sudo apt-get install dpkg-dev build-essential zlib1g-dev libpcre3 libpcre3-dev git unzip libssl-dev -y
 
 wget -N http://nginx.org/keys/nginx_signing.key
 sudo apt-key add nginx_signing.key
@@ -52,7 +52,7 @@ wget https://dl.google.com/dl/page-speed/psol/${NPS_VERSION}.tar.gz
 tar -xzvf ${NPS_VERSION}.tar.gz  # extracts to psol/
 
 # now enable pagespeed module in debian/rules
-sed -i "/--with-file-aio \\/i--add-module=modules/ngx_pagespeed-${NPS_VERSION}-beta \\" $NGINX_BUILD_DIR/debian/rules
+sed -i "s/\.\/configure /. \/configure --add-module=modules\/ngx_pagespeed-${NPS_VERSION}-beta /g" $NGINX_BUILD_DIR/debian/rules
 
 # build deb
 cd $NGINX_BUILD_DIR
