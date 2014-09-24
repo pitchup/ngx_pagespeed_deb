@@ -54,7 +54,6 @@ tar -xzvf ${NPS_VERSION}.tar.gz  # extracts to psol/
 # now enable pagespeed module in debian/rules
 sed -i "s/.\/configure /.\/configure --add-module=modules\/ngx_pagespeed-release-${NPS_VERSION}-beta /g" $NGINX_BUILD_DIR/debian/rules
 
-
 # build deb
 cd $NGINX_BUILD_DIR
 dpkg-buildpackage -b
