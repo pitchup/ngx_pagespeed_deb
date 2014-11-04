@@ -2,13 +2,16 @@
 
 set -x
 
-NPS_VERSION=1.9.32.2
+# get version from command line or use default
+NPS_VERSION=${1:-1.9.32.2}
+
+echo "Building ngx_pagespeed ${NPS_VERSION}"
 
 UBUNTU_VERSION=`lsb_release -c | cut -f2`
 
 sudo apt-get install build-essential -y
 sudo apt-get build-dep nginx -y
-sudo apt-get install dpkg-dev build-essential zlib1g-dev libpcre3 libpcre3-dev git unzip libssl-dev -y
+sudo apt-get install dpkg-dev build-essential zlib1g-dev libpcre3 libpcre3-dev git unzip libssl-dev devscripts -y
 
 wget -N http://nginx.org/keys/nginx_signing.key
 sudo apt-key add nginx_signing.key
@@ -54,8 +57,11 @@ tar -xzvf ${NPS_VERSION}.tar.gz  # extracts to psol/
 # now enable pagespeed module in debian/rules
 sed -i "s/\.\/configure /.\/configure --add-module=modules\/ngx_pagespeed-release-${NPS_VERSION}-beta /g" $NGINX_BUILD_DIR/debian/rules
 
-# build deb
+# lets add our version number
 cd $NGINX_BUILD_DIR
+dch -p -v 1.6.2+nps1.9.32.2 "Adding ngx_pagespeed ${NPS_VERSION}"
+
+# build deb
 dpkg-buildpackage -b
 
 # debs should be in ~/ngx_build
