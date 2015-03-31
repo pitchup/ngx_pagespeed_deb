@@ -3,7 +3,7 @@
 set -x
 
 # get version from command line or use default
-NPS_VERSION=${1:-1.9.32.2}
+NPS_VERSION=${1:-1.9.32.3}
 
 echo "Building ngx_pagespeed ${NPS_VERSION}"
 
@@ -64,10 +64,10 @@ sed -i "s/\.\/configure /.\/configure --add-module=modules\/ngx_pagespeed-releas
 
 # lets add our version number
 cd $NGINX_BUILD_DIR
-dch -p -v 1.6.2+nps1.9.32.2 "Adding ngx_pagespeed ${NPS_VERSION}"
+dch -p -v ${NGINX_VER:6}+nps${NPS_VERSION} "Adding ngx_pagespeed ${NPS_VERSION}"
 
 # build deb
 dpkg-buildpackage -b
 
-# debs should be in ~/ngx_build
+# debs should be in ngx_build
 
