@@ -2,8 +2,8 @@
 
 set -x
 
-# get version from command line or use default
-NPS_VERSION=${1:-1.9.32.11}
+# get version from env or use default
+NPS_VERSION=${NPS_VERSION:-1.10.33.1}
 
 echo "Building ngx_pagespeed ${NPS_VERSION}"
 
