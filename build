@@ -13,7 +13,7 @@ PS_NGX_EXTRA_FLAGS="--with-cc=/usr/lib/gcc-mozilla/bin/gcc  --with-ld-opt=-stati
 
 sudo apt-get install build-essential -y
 sudo apt-get build-dep nginx -y
-sudo apt-get install dpkg-dev build-essential zlib1g-dev libpcre3 libpcre3-dev git unzip libssl-dev devscripts gcc-mozilla -y
+sudo apt-get install dpkg-dev build-essential zlib1g-dev libpcre3 libpcre3-dev unzip gcc-mozilla -y
 
 wget -N http://nginx.org/keys/nginx_signing.key
 sudo apt-key add nginx_signing.key
@@ -62,7 +62,7 @@ wget https://dl.google.com/dl/page-speed/psol/${NPS_VERSION}.tar.gz
 tar -xzvf ${NPS_VERSION}.tar.gz  # extracts to psol/
 
 # now enable pagespeed module in debian/rules
-sed -i "s/\.\/configure /.\/configure --add-module=modules\/ngx_pagespeed-release-${NPS_VERSION}-beta /g" $NGINX_BUILD_DIR/debian/rules
+sed -i "s/\.\/configure /.\/configure --add-module=modules\/ngx_pagespeed-release-${NPS_VERSION}-beta ${PS_NGX_EXTRA_FLAGS} /g" $NGINX_BUILD_DIR/debian/rules
 
 # lets add our version number
 cd $NGINX_BUILD_DIR
