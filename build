@@ -9,7 +9,8 @@ echo "Building ngx_pagespeed ${NPS_VERSION}"
 
 UBUNTU_VERSION=`lsb_release -c | cut -f2`
 
-PS_NGX_EXTRA_FLAGS="--with-cc=/usr/lib/gcc-mozilla/bin/gcc  --with-ld-opt=-static-libstdc++"
+# quote the / since it will go into sed
+PS_NGX_EXTRA_FLAGS="--with-cc=\/usr\/lib\/gcc-mozilla\/bin\/gcc  --with-ld-opt=-static-libstdc++"
 
 sudo apt-get install build-essential -y
 sudo apt-get build-dep nginx -y
