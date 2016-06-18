@@ -71,3 +71,4 @@ make
 
 sudo checkinstall -D --install=no -y make install
 sudo rm -rf doc-pak
+mv *.deb $NGX_BUILD/
