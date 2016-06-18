@@ -1,9 +1,9 @@
-#!/bin/bash -x 
+#!/bin/bash
 
-set -x
+set -ex
 
 # get version from env or use default
-NPS_VERSION=${NPS_VERSION:-1.10.33.1}
+NPS_VERSION=${NPS_VERSION:-1.11.33.2}
 
 echo "Building ngx_pagespeed ${NPS_VERSION}"
 
@@ -13,19 +13,8 @@ UBUNTU_VERSION=`lsb_release -c | cut -f2`
 PS_NGX_EXTRA_FLAGS="--with-cc=\/usr\/lib\/gcc-mozilla\/bin\/gcc  --with-ld-opt=-static-libstdc++"
 
 sudo apt-get install build-essential -y
-sudo apt-get build-dep nginx -y
-sudo apt-get install dpkg-dev build-essential zlib1g-dev libpcre3 libpcre3-dev unzip gcc-mozilla -y
+sudo apt-get install dpkg-dev build-essential zlib1g-dev libpcre3 libpcre3-dev unzip gcc-mozilla checkinstall -y
 
-wget -N http://nginx.org/keys/nginx_signing.key
-sudo apt-key add nginx_signing.key
-rm nginx_signing.key
-
-# add nginx to sources
-echo "deb http://nginx.org/packages/ubuntu/ ${UBUNTU_VERSION} nginx" | sudo tee /etc/apt/sources.list.d/nginx.list
-echo "deb-src http://nginx.org/packages/ubuntu/ ${UBUNTU_VERSION} nginx" | sudo tee -a /etc/apt/sources.list.d/nginx.list
-
-# update list of packages
-sudo apt-get update
 
 # build dir
 get_abs_filename() {
@@ -37,22 +26,11 @@ rm -rf $NGX_BUILD
 mkdir $NGX_BUILD
 cd $NGX_BUILD
 
-# install any packages needed for nginx
-sudo apt-get build-dep nginx -y
+wget http://nginx.org/download/nginx-1.11.1.tar.gz
+tar zxf nginx-1.11.1.tar.gz
 
-apt-get source nginx
-NGINX_VER=$(find ./nginx* -maxdepth 0 -type d | sed "s|^\./||")
-NGINX_BUILD_DIR=$NGX_BUILD/$NGINX_VER
-
-echo "Using nginx ${NGINX_VER}"
-
-# can edit debian/rules for your modules
-# here we use sed to add the geoip module
-#sed -i '/--with-http_sub_module \\/i--with-http_geoip_module \\' $NGINX_BUILD_DIR/debian/rules
-
-# create a modules dir to hold the pagespeed module
-mkdir $NGINX_BUILD_DIR/modules
-cd $NGINX_BUILD_DIR/modules
+wget https://www.openssl.org/source/openssl-1.0.2h.tar.gz
+tar zxf openssl-1.0.2h.tar.gz
 
 # steps from https://github.com/pagespeed/ngx_pagespeed
 # download pagespeed
@@ -61,16 +39,35 @@ unzip release-${NPS_VERSION}-beta.zip
 cd ngx_pagespeed-release-${NPS_VERSION}-beta/
 wget https://dl.google.com/dl/page-speed/psol/${NPS_VERSION}.tar.gz
 tar -xzvf ${NPS_VERSION}.tar.gz  # extracts to psol/
+cd ..
 
-# now enable pagespeed module in debian/rules
-sed -i "s/\.\/configure /.\/configure --add-module=modules\/ngx_pagespeed-release-${NPS_VERSION}-beta ${PS_NGX_EXTRA_FLAGS} /g" $NGINX_BUILD_DIR/debian/rules
+cd nginx-1.11.1
+./configure \
+	--user=nginx \
+	--group=nginx \
+	 --prefix=/etc/nginx \
+--sbin-path=/usr/sbin/nginx \
+--conf-path=/etc/nginx/nginx.conf \
+--error-log-path=/var/log/nginx/error.log \
+--http-log-path=/var/log/nginx/access.log \
+--pid-path=/var/run/nginx.pid \
+--lock-path=/var/run/nginx.lock \
+--http-client-body-temp-path=/var/cache/nginx/client_temp \
+--http-proxy-temp-path=/var/cache/nginx/proxy_temp \
+--http-fastcgi-temp-path=/var/cache/nginx/fastcgi_temp \
+--http-uwsgi-temp-path=/var/cache/nginx/uwsgi_temp \
+--http-scgi-temp-path=/var/cache/nginx/scgi_temp \
+--with-cc-opt='-g -O2 -fstack-protector --param=ssp-buffer-size=4 -Wformat -Werror=format-security -Wp,-D_FORTIFY_SOURCE=2' \
+--with-ld-opt='-Wl,-z,relro -Wl,--as-needed' \
+	--add-module=../ngx_pagespeed-release-${NPS_VERSION}-beta \
+	${PS_NGX_EXTRA_FLAGS} \
+	--with-openssl=../openssl-1.0.2h \
+	 --with-http_ssl_module \
+	--with-http_v2_module \
+	--with-http_stub_status_module \
+	--with-http_realip_module
 
-# lets add our version number
-cd $NGINX_BUILD_DIR
-dch -p -v ${NGINX_VER:6}+nps${NPS_VERSION} "Adding ngx_pagespeed ${NPS_VERSION}"
+make
 
-# build deb
-dpkg-buildpackage -b
-
-# debs should be in ngx_build
-
+sudo checkinstall -D --install=no -y make install
+sudo rm -rf doc-pak
