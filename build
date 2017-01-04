@@ -63,7 +63,7 @@ cd nginx-${NGINX_VERSION}
 --http-scgi-temp-path=/var/cache/nginx/scgi_temp \
 --with-cc-opt='-g -O2 -fstack-protector --param=ssp-buffer-size=4 -Wformat -Werror=format-security -Wp,-D_FORTIFY_SOURCE=2' \
 --with-ld-opt='-Wl,-z,relro -Wl,--as-needed' \
-	--add-module=../ngx_pagespeed-release-${NPS_VERSION}-beta \
+	--add-module=../ngx_pagespeed-${NPS_VERSION}-beta \
 	${PS_NGX_EXTRA_FLAGS} \
 	--with-openssl=../openssl-${OPENSSL_VERSION} \
 	 --with-http_ssl_module \
