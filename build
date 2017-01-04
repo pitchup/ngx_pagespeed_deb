@@ -3,8 +3,8 @@
 set -ex
 
 # get version from env or use default
-NPS_VERSION=${NPS_VERSION:-1.11.33.4}
-NGINX_VERSION=${NGINX_VERSION:-1.11.4}
+NPS_VERSION=${NPS_VERSION:-1.12.34.2}
+NGINX_VERSION=${NGINX_VERSION:-1.11.8}
 OPENSSL_VERSION=${OPENSSL_VERSION:-1.0.2j}
 
 echo "Building ngx_pagespeed ${NPS_VERSION}"
@@ -15,7 +15,7 @@ UBUNTU_VERSION=`lsb_release -c | cut -f2`
 PS_NGX_EXTRA_FLAGS="--with-cc=\/usr\/lib\/gcc-mozilla\/bin\/gcc  --with-ld-opt=-static-libstdc++"
 
 sudo apt-get install build-essential -y
-sudo apt-get install dpkg-dev build-essential zlib1g-dev libpcre3 libpcre3-dev unzip gcc-mozilla checkinstall -y
+sudo apt-get install dpkg-dev build-essential zlib1g-dev libpcre3 libpcre3-dev unzip checkinstall -y
 
 
 # build dir
@@ -36,11 +36,13 @@ tar zxf openssl-${OPENSSL_VERSION}.tar.gz
 
 # steps from https://github.com/pagespeed/ngx_pagespeed
 # download pagespeed
-wget https://github.com/pagespeed/ngx_pagespeed/archive/release-${NPS_VERSION}-beta.zip
-unzip release-${NPS_VERSION}-beta.zip
-cd ngx_pagespeed-release-${NPS_VERSION}-beta/
-wget https://dl.google.com/dl/page-speed/psol/${NPS_VERSION}.tar.gz
-tar -xzvf ${NPS_VERSION}.tar.gz  # extracts to psol/
+wget https://github.com/pagespeed/ngx_pagespeed/archive/v${NPS_VERSION}-beta.zip
+unzip v${NPS_VERSION}-beta.zip
+cd ngx_pagespeed-${NPS_VERSION}-beta/
+psol_url=https://dl.google.com/dl/page-speed/psol/${NPS_VERSION}.tar.gz
+[ -e scripts/format_binary_url.sh ] && psol_url=$(scripts/format_binary_url.sh PSOL_BINARY_URL)
+wget ${psol_url}
+tar -xzvf $(basename ${psol_url})  # extracts to psol/
 cd ..
 
 cd nginx-${NGINX_VERSION}
