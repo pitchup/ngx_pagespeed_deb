@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# This script builds a nginx deb with pagespeed
+# but the deb doesn't contain any init scripts
+
 set -ex
 
 # get version from env or use default
