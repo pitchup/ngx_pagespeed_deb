@@ -14,8 +14,9 @@ echo "Building ngx_pagespeed ${NPS_VERSION}"
 
 UBUNTU_VERSION=`lsb_release -c | cut -f2`
 
-# quote the / since it will go into sed
-PS_NGX_EXTRA_FLAGS="--with-cc=\/usr\/lib\/gcc-mozilla\/bin\/gcc  --with-ld-opt=-static-libstdc++"
+PS_NGX_EXTRA_FLAGS="--with-cc=/usr/lib/gcc-mozilla/bin/gcc"
+LD_OPTS="-Wl,-z,relro -Wl,--as-needed -static-libstdc++"
+CC_OPTS="-g -O2 -fstack-protector --param=ssp-buffer-size=4 -Wformat -Werror=format-security -Wp,-D_FORTIFY_SOURCE=2"
 
 sudo apt-get install build-essential -y
 sudo apt-get install dpkg-dev build-essential zlib1g-dev libpcre3 libpcre3-dev unzip checkinstall -y
@@ -27,8 +28,7 @@ get_abs_filename() {
   echo "$(cd "$(dirname "$1")" && pwd)/$(basename "$1")"
 }
 NGX_BUILD=$(get_abs_filename "./ngx_build")
-rm -rf $NGX_BUILD
-mkdir $NGX_BUILD
+
 cd $NGX_BUILD
 
 wget http://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz
@@ -64,12 +64,12 @@ cd nginx-${NGINX_VERSION}
 --http-fastcgi-temp-path=/var/cache/nginx/fastcgi_temp \
 --http-uwsgi-temp-path=/var/cache/nginx/uwsgi_temp \
 --http-scgi-temp-path=/var/cache/nginx/scgi_temp \
---with-cc-opt='-g -O2 -fstack-protector --param=ssp-buffer-size=4 -Wformat -Werror=format-security -Wp,-D_FORTIFY_SOURCE=2' \
---with-ld-opt='-Wl,-z,relro -Wl,--as-needed' \
+--with-cc-opt="${CC_OPTS}" \
+--with-ld-opt="${LD_OPTS}" \
 	--add-module=../ngx_pagespeed-${NPS_VERSION}-beta \
 	${PS_NGX_EXTRA_FLAGS} \
 	--with-openssl=../openssl-${OPENSSL_VERSION} \
-	 --with-http_ssl_module \
+	--with-http_ssl_module \
 	--with-http_v2_module \
 	--with-http_stub_status_module \
 	--with-http_realip_module
